@@ -14,27 +14,22 @@ model.fit(X, y)
 
 @app.route('/')
 def home():
-    return """
-    <h2>Student Performance Predictor</h2>
-    <form method="post" action="/predict">
-        Study Hours: <input type="number" name="study_hours"><br><br>
-        Attendance (%): <input type="number" name="attendance"><br><br>
-        Previous Score: <input type="number" name="previous_score"><br><br>
-        <button type="submit">Predict</button>
-    </form>
-    """
+    return render_template('index.html')
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    study_hours = float(request.form['study_hours'])
-    attendance = float(request.form['attendance'])
-    previous_score = float(request.form['previous_score'])
+    try:
+        study_hours = float(request.form['study_hours'])
+        attendance = float(request.form['attendance'])
+        previous_score = float(request.form['previous_score'])
 
-    prediction = model.predict([[study_hours, attendance, previous_score]])
-
-    result = "✅ PASS" if prediction[0] == 1 else "❌ FAIL"
-
-    return f"<h2>Prediction Result: {result}</h2><a href='/'>Go Back</a>"
+        # Predict
+        prediction = model.predict([[study_hours, attendance, previous_score]])
+        result = "✅ PASS" if prediction[0] == 1 else "❌ FAIL"
+        
+        return render_template('index.html', prediction_text=f"Prediction: {result}")
+    except Exception as e:
+        return render_template('index.html', prediction_text=f"Error: {str(e)}")
 
 if __name__ == '__main__':
     app.run(debug=True)
